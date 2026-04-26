@@ -21,4 +21,32 @@ router.post('/signup', async (req, res) => {
     res.status(201).json({ message: 'User created', user: data.user });
 });
 
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+
+    res.cookie('token', data.session.access_token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 3600000 
+    });
+
+    res.json({ message: 'Logged in', user: data.user });
+}); 
+
+router.post('/logout', async (req, res) => {
+    res.clearCookie('token');
+    res.status(200).json({ message: 'Logged out' });
+});
+
+
 export default router;

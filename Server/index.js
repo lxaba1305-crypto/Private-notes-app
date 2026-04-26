@@ -5,7 +5,7 @@ import authRoutes from './routes/authRoutes.js';
 import notesRoutes from './routes/notesRoutes.js';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = parseInt(process.env.PORT) || 8080;
 
 //Middleware 
 app.use(express.json());
@@ -19,6 +19,15 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', notesRoutes);
 
-app.listen(PORT, () => {
+
+
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.log(`Port ${PORT} busy, trying ${PORT + 1}...`);
+        server.listen(PORT + 1);
+    }
 });
